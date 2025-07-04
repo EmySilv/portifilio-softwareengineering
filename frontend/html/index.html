@@ -51,21 +51,36 @@
               id="searchInput"
               placeholder="Buscar tarefa..."
             />
+            <button type="submit">Buscar Tarefa</button>
           </div>
 
           <!-- Formulário -->
           <form id="task-form">
-            <input
-              type="text"
-              id="task-input"
-              placeholder="Digite o título da tarefa"
-              required
-            />
-            <textarea
-              id="descricao-input"
-              placeholder="Descrição da tarefa"
-              required
-            ></textarea>
+            <div class="title">
+              <p class="title-text">Título da tarefa</p>
+              <input
+                type="text"
+                id="task-input"
+                placeholder="Digite o título da tarefa"
+                required
+              />
+            </div>
+            <div class="description">
+              <p class="description-text">Descrição da tarefa</p>
+              <textarea
+                id="descricao-input"
+                placeholder="Descrição da tarefa"
+                required
+              ></textarea>
+            </div>
+            <div class="status">
+              <p class="status-text">Status da tarefa</p>
+              <select name="status" id="status">
+                <option value="pendente">Pendente</option>
+                <option value="não-iniciado">Não iniciado</option>
+                <option value="em-andamento">Em Andamento</option>
+                <option value="concluida">Concluída</option>
+              </select>
             <button type="submit">Adicionar Tarefa</button>
           </form>
         </div>

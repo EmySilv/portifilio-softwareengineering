@@ -38,8 +38,6 @@ body {
     gap: 10px;
 }
 
-
-
 .headerContainer{
     display: flex;
     align-items: center;
@@ -76,6 +74,18 @@ body {
     p{
         text-align: left;
     }
+}
+#task-form{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #c5c5c5;
+    border-radius: 5px;
+
+    box-shadow: 2px 2px 4px #c5c5c5;
 }
 
 #task-status{
@@ -141,16 +151,14 @@ i{
     font-size: 30px;
 }
 
-.profile{
+.status{
     display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 1rem;
-    border: 3px solid #ff7214d5;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
 
-    i{
-        padding: 2px;
-        font-size: 26px;
+    p{
+        font-size: 18px;
     }
 }
 
@@ -165,6 +173,13 @@ form {
 }
 
 input[type="text"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 250px;
+}
+
+textarea {
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
