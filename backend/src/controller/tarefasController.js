@@ -51,3 +51,20 @@ exports.remove = (req, res) => {
     res.json({ message: 'Tarefa removida com sucesso!' });
   });
 };
+
+// Buscar tarefas por termo
+exports.search = (req, res) => {
+  const termo = `%${req.query.termo || ''}%`;
+
+  const sql = `
+    SELECT t.*, u.username AS criado_por_nome
+    FROM tarefas t
+    JOIN usuario u ON u.id = t.criado_por
+    WHERE t.titulo LIKE ? OR t.descricao LIKE ?
+  `;
+
+  db.query(sql, [termo, termo], (err, results) => {
+    if (err) return res.status(500).json({ erro: err });
+    res.json(results);
+  });
+};

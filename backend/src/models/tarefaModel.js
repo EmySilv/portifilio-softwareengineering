@@ -2,15 +2,15 @@ const db = require('../db');
 
 const Tarefa = {
   listar: (callback) => {
-    const sql = `SELECT t.*, u.username AS criado_por_nome
+    const sql = `SELECT t.*
                  FROM tarefas t
-                 JOIN usuario u ON u.id = t.criado_por`;
+                 `;
     db.query(sql, callback);
   },
 
   criar: (tarefa, callback) => {
-    const sql = 'INSERT INTO tarefas (id, titulo, descricao, status, criado_por) VALUES (?, ?, ?, ?, ?)';
-    db.query(sql, [tarefa.id, tarefa.titulo, tarefa.descricao, tarefa.status, tarefa.criado_por], callback);
+    const sql = 'INSERT INTO tarefas (id, titulo, descricao, status) VALUES (?, ?, ?, ?)';
+    db.query(sql, [tarefa.id, tarefa.titulo, tarefa.descricao, tarefa.status], callback);
   },
 
   atualizar: (id, dados, callback) => {

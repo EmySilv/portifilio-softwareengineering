@@ -1,122 +1,148 @@
-const API_URL = "http://localhost:3000/tarefas"; // Altere para o endereço do backend se necessário
+const API_URL = "http://localhost:3000/tarefas";
 
-// DOM Elements
+const taskContainer = document.querySelector(".taskToday");
+const searchInput = document.getElementById("searchInput");
 const taskForm = document.getElementById("task-form");
 const taskInput = document.getElementById("task-input");
-const taskList = document.getElementById("task-list");
+const descricaoInput = document.getElementById("descricao-input");
 
-// Função para carregar todas as tarefas do backend
+let allTasks = []; // cache local para busca
+
+// Carrega todas as tarefas ao iniciar
 async function loadTasks() {
   try {
-    const response = await fetch(API_URL);
-    const tasks = await response.json();
-
-    taskList.innerHTML = ""; // Limpa a lista atual
-
-    tasks.forEach((task) => {
-      const li = document.createElement("li");
-      li.innerHTML = `
-        <div class="taskCard">
-          <p><strong>Título:</strong> ${task.titulo}</p>
-          <p><strong>Data:</strong> ${new Date(task.data).toLocaleDateString()}</p>
-          <p><strong>Descrição:</strong> ${task.descricao}</p>
-          <p><strong>Status:</strong> ${task.status}</p>
-          <div class="buttonsTask">
-            <button onclick="deleteTask(${task.id})">Excluir</button>
-            <button onclick="editTask(${task.id}, '${task.titulo}', '${task.descricao}', '${task.status}')">Alterar</button>
-          </div>
-        </div>
-      `;
-      taskList.appendChild(li);
-    });
+    const res = await fetch(API_URL);
+    const data = await res.json();
+    allTasks = data;
+    renderTasks(data);
   } catch (err) {
     console.error("Erro ao carregar tarefas:", err);
   }
 }
 
-// Função para criar nova tarefa
+// Renderiza as tarefas no DOM
+function renderTasks(tasks) {
+  // Limpa cards anteriores
+  taskContainer.querySelectorAll(".taskCard").forEach(card => card.remove());
+
+  tasks.forEach(task => {
+    const card = document.createElement("div");
+    card.classList.add("taskCard");
+
+    card.innerHTML = `
+      <p><strong>Título:</strong> ${task.titulo}</p>
+      <p><strong>Data:</strong> ${new Date(task.data).toLocaleDateString()}</p>
+      <p><strong>Descrição:</strong> ${task.descricao}</p>
+      <p><strong>Status:</strong> ${task.status}</p>
+      <div class="buttonsTask">
+        <button onclick="deleteTask(${task.id})">Excluir</button>
+        <button onclick="editTask(${task.id}, '${escapeString(task.titulo)}', '${escapeString(task.descricao)}', '${task.status}')">Alterar</button>
+      </div>
+    `;
+
+    taskContainer.appendChild(card);
+  });
+}
+
+// Escapa aspas simples para não quebrar HTML inline
+function escapeString(str) {
+  return str.replace(/'/g, "\\'");
+}
+
+// Criação de nova tarefa
 taskForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const titulo = taskInput.value.trim();
-  if (!titulo) return;
+  const descricao = descricaoInput.value.trim();
+  if (!titulo || !descricao) return;
 
   const novaTarefa = {
-    id: Date.now(), // ID único gerado no front
+    id: Date.now(),
     titulo,
-    descricao: "Tarefa criada pelo formulário", // você pode criar um campo para isso
+    descricao,
     status: "pendente",
-    criado_por: "test001" // ID do usuário criador (substitua por valor real após login)
+    criado_por: "u001" // ID fixo, pois sem login
   };
 
   try {
-    const response = await fetch(API_URL, {
+    const res = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(novaTarefa)
     });
 
-    if (response.ok) {
+    if (res.ok) {
       taskInput.value = "";
-      loadTasks();
-    } else {
-      const error = await response.json();
-      alert("Erro ao criar tarefa: " + error.message);
+      descricaoInput.value = "";
+      await loadTasks();
     }
   } catch (err) {
-    console.error("Erro na criação:", err);
+    console.error("Erro ao adicionar tarefa:", err);
   }
 });
 
-// Função para excluir uma tarefa
+// Excluir tarefa
 async function deleteTask(id) {
   if (!confirm("Tem certeza que deseja excluir esta tarefa?")) return;
 
   try {
-    const response = await fetch(`${API_URL}/${id}`, {
+    const res = await fetch(`${API_URL}/${id}`, {
       method: "DELETE"
     });
 
-    if (response.ok) {
-      loadTasks();
-    } else {
-      alert("Erro ao excluir tarefa.");
+    if (res.ok) {
+      await loadTasks();
     }
   } catch (err) {
-    console.error("Erro ao excluir:", err);
+    console.error("Erro ao excluir tarefa:", err);
   }
 }
 
-// Função para editar uma tarefa
-async function editTask(id, titulo, descricao, statusAtual) {
+// Editar tarefa
+async function editTask(id, titulo, descricao, status) {
   const novoTitulo = prompt("Novo título:", titulo);
   const novaDescricao = prompt("Nova descrição:", descricao);
-  const novoStatus = prompt("Novo status (pendente, concluída, atrasada):", statusAtual);
+  const novoStatus = prompt("Novo status:", status);
 
   if (!novoTitulo || !novaDescricao || !novoStatus) return;
 
-  const tarefaAtualizada = {
-    titulo: novoTitulo,
-    descricao: novaDescricao,
-    status: novoStatus
-  };
-
   try {
-    const response = await fetch(`${API_URL}/${id}`, {
+    const res = await fetch(`${API_URL}/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(tarefaAtualizada)
+      body: JSON.stringify({
+        titulo: novoTitulo,
+        descricao: novaDescricao,
+        status: novoStatus
+      })
     });
 
-    if (response.ok) {
-      loadTasks();
-    } else {
-      alert("Erro ao atualizar tarefa.");
+    if (res.ok) {
+      await loadTasks();
     }
   } catch (err) {
-    console.error("Erro ao atualizar:", err);
+    console.error("Erro ao editar tarefa:", err);
   }
 }
 
-// Inicializa
+// Busca dinâmica
+searchInput.addEventListener("input", async (e) => {
+  const termo = e.target.value.toLowerCase();
+
+  if (!termo) {
+    renderTasks(allTasks); // mostra todas
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/search?termo=${encodeURIComponent(termo)}`);
+    const filtradas = await res.json();
+    renderTasks(filtradas);
+  } catch (err) {
+    console.error("Erro ao buscar tarefas:", err);
+  }
+});
+
+// Carregamento inicial
 loadTasks();

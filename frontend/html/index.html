@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -22,58 +22,54 @@
           <p>Sistema de Gerenciamento de Tarefas</p>
         </div>
       </header>
+
       <div class="tasksContainer">
+        <!-- Tarefas do Dia -->
         <div class="taskToday">
           <p class="task-title">Tarefas do Dia</p>
-          <div class="taskCard">
-            <p id="task-name">Titulo: Arrumar o Quarto</p>
-            <p id="task-date">Data: 01/01/2023</p>
-            <p id="task-description">Descrição: Descrição da tarefa</p>
-            <p id="task-status">Status: Pendente</p>
-            <div class="buttonsTask">
-              <button id="clear-tasks">Excluir Tarefa</button>
-              <button id="alter-task">Alterar Tarefa</button>
-            </div>
-          </div>
-          <div class="taskCard">
-            <p id="task-name">Titulo: Arrumar o Quarto</p>
-            <p id="task-date">Data: 01/01/2023</p>
-            <p id="task-description">Descrição: Descrição da tarefaasas asasasas asasasasas</p>
-            <p id="task-status">Status: Pendente</p>
-            <div class="buttonsTask">
-              <button id="clear-tasks">Excluir Tarefa</button>
-              <button id="alter-task">Alterar Tarefa</button>
-            </div>
-          </div>
+          <!-- Inserção dinâmica das tarefas -->
         </div>
+
+        <!-- Tarefas Concluídas -->
         <div class="taskCompleted">
           <p class="task-title">Tarefas Concluídas</p>
           <p id="completed-count">0 tarefas concluídas</p>
         </div>
+
+        <!-- Tarefas Atrasadas -->
         <div class="taskOverdue">
           <p class="task-title">Tarefas Atrasadas</p>
           <p id="overdue-count">0 tarefas atrasadas</p>
         </div>
+
+        <!-- Área geral -->
         <div class="generalTasks">
+          <!-- Busca -->
           <div class="search">
             <input
               type="text"
               id="searchInput"
               placeholder="Buscar tarefa..."
             />
-            <button onclick="search()">Buscar</button>
           </div>
+
+          <!-- Formulário -->
           <form id="task-form">
             <input
               type="text"
               id="task-input"
-              placeholder="Digite sua tarefa"
+              placeholder="Digite o título da tarefa"
+              required
             />
+            <textarea
+              id="descricao-input"
+              placeholder="Descrição da tarefa"
+              required
+            ></textarea>
             <button type="submit">Adicionar Tarefa</button>
           </form>
         </div>
       </div>
-      <ul id="task-list"></ul>
     </div>
   </body>
 </html>
