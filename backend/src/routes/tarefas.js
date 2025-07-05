@@ -1,12 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const controller = require('../controllers/tarefasController');
+const tarefasController = require('../controller/tarefasController');
 
-router.get('/', controller.listAll);
-router.get('/search', controller.search);
-router.post('/', controller.create);
-router.put('/:id', controller.update);
-router.delete('/:id', controller.remove);
-
+router.get('/', tarefasController.listar);         // Listar todas
+router.get('/:id', tarefasController.buscarPorId); // Buscar por id
+router.post('/', tarefasController.criar);         // Criar
+router.put('/:id', tarefasController.atualizar);   // Atualizar
+router.delete('/:id', tarefasController.deletar);  // Deletar
 
 module.exports = router;

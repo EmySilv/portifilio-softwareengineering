@@ -1,70 +1,44 @@
-const Tarefa = require('../models/tarefaModel');
+const tarefaService = require('../services/tarefaService');
 
-// Listar todas as tarefas
-exports.listAll = (req, res) => {
-  Tarefa.listar((err, results) => {
-    if (err) return res.status(500).json({ erro: err });
-    res.json(results);
-  });
+const listar = (req, res) => {
+  const tarefas = tarefaService.listarTodas();
+  res.json(tarefas);
 };
 
-// Criar uma nova tarefa
-exports.create = (req, res) => {
-  const { id, titulo, descricao, status, criado_por } = req.body;
-
-  // Validação simples
-  if (!id || !titulo || !descricao || !status || !criado_por) {
-    return res.status(400).json({ message: 'Dados incompletos para criar a tarefa.' });
-  }
-
-  const novaTarefa = { id, titulo, descricao, status, criado_por };
-
-  Tarefa.criar(novaTarefa, (err) => {
-    if (err) return res.status(500).json({ erro: err });
-    res.status(201).json({ message: 'Tarefa criada com sucesso!' });
-  });
-};
-
-// Atualizar uma tarefa existente
-exports.update = (req, res) => {
+const buscarPorId = (req, res) => {
   const id = req.params.id;
-  const { titulo, descricao, status } = req.body;
+  const tarefa = tarefaService.buscarTarefaPorId(id);
+  if (!tarefa) return res.status(404).json({ message: 'Tarefa não encontrada' });
+  res.json(tarefa);
+};
 
-  if (!titulo || !descricao || !status) {
-    return res.status(400).json({ message: 'Dados incompletos para atualizar a tarefa.' });
+const criar = (req, res) => {
+  try {
+    const novaTarefa = tarefaService.criarTarefa(req.body);
+    res.status(201).json(novaTarefa);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
-
-  const dadosAtualizados = { titulo, descricao, status };
-
-  Tarefa.atualizar(id, dadosAtualizados, (err) => {
-    if (err) return res.status(500).json({ erro: err });
-    res.json({ message: 'Tarefa atualizada com sucesso!' });
-  });
 };
 
-// Remover uma tarefa
-exports.remove = (req, res) => {
+const atualizar = (req, res) => {
   const id = req.params.id;
-
-  Tarefa.remover(id, (err) => {
-    if (err) return res.status(500).json({ erro: err });
-    res.json({ message: 'Tarefa removida com sucesso!' });
-  });
+  const tarefaAtualizada = tarefaService.atualizarTarefa(id, req.body);
+  if (!tarefaAtualizada) return res.status(404).json({ message: 'Tarefa não encontrada' });
+  res.json(tarefaAtualizada);
 };
 
-// Buscar tarefas por termo
-exports.search = (req, res) => {
-  const termo = `%${req.query.termo || ''}%`;
+const deletar = (req, res) => {
+  const id = req.params.id;
+  const sucesso = tarefaService.deletarTarefa(id);
+  if (!sucesso) return res.status(404).json({ message: 'Tarefa não encontrada' });
+  res.status(204).send();
+};
 
-  const sql = `
-    SELECT t.*, u.username AS criado_por_nome
-    FROM tarefas t
-    JOIN usuario u ON u.id = t.criado_por
-    WHERE t.titulo LIKE ? OR t.descricao LIKE ?
-  `;
-
-  db.query(sql, [termo, termo], (err, results) => {
-    if (err) return res.status(500).json({ erro: err });
-    res.json(results);
-  });
+module.exports = {
+  listar,
+  buscarPorId,
+  criar,
+  atualizar,
+  deletar,
 };

@@ -1,10 +1,17 @@
 const express = require('express');
+const cors = require('cors');
 const app = express();
-const usuariosRoutes = require('./routes/usuarios');
-const tarefasRoutes = require('./routes/tarefas');
+
+// Permitir CORS apenas da origem específica
+app.use(cors({
+  origin: 'http://127.0.0.1:5500',
+  allowedHeaders: '*'
+}));
 
 app.use(express.json());
-app.use('/usuarios', usuariosRoutes);
-app.use('/tarefas', tarefasRoutes);
+
+// Suas rotas
+const tarefasRoutes = require('./routes/tarefas');
+app.use('/api/tarefas', tarefasRoutes);
 
 module.exports = app;

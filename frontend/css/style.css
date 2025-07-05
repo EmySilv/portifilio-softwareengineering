@@ -78,7 +78,7 @@ body {
 #task-form{
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 1rem;
     width: 100%;
     padding: 10px;
     background-color: #f9f9f9;
@@ -151,7 +151,7 @@ i{
     font-size: 30px;
 }
 
-.status{
+.status, .description, .title {
     display: flex;
     align-items: flex-start;
     flex-direction: column;
@@ -159,6 +159,12 @@ i{
 
     p{
         font-size: 18px;
+    }
+    select{
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        width: 250px;
     }
 }
 

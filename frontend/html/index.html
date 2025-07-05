@@ -27,19 +27,18 @@
         <!-- Tarefas do Dia -->
         <div class="taskToday">
           <p class="task-title">Tarefas do Dia</p>
-          <!-- Inserção dinâmica das tarefas -->
         </div>
 
         <!-- Tarefas Concluídas -->
         <div class="taskCompleted">
           <p class="task-title">Tarefas Concluídas</p>
-          <p id="completed-count">0 tarefas concluídas</p>
+         
         </div>
 
         <!-- Tarefas Atrasadas -->
         <div class="taskOverdue">
           <p class="task-title">Tarefas Atrasadas</p>
-          <p id="overdue-count">0 tarefas atrasadas</p>
+          
         </div>
 
         <!-- Área geral -->
@@ -51,7 +50,7 @@
               id="searchInput"
               placeholder="Buscar tarefa..."
             />
-            <button type="submit">Buscar Tarefa</button>
+            <button type="button" onclick="searchTarefa()">Buscar Tarefa</button>
           </div>
 
           <!-- Formulário -->
@@ -75,12 +74,14 @@
             </div>
             <div class="status">
               <p class="status-text">Status da tarefa</p>
-              <select name="status" id="status">
+              <select name="status" id="status" required>
                 <option value="pendente">Pendente</option>
                 <option value="não-iniciado">Não iniciado</option>
                 <option value="em-andamento">Em Andamento</option>
                 <option value="concluida">Concluída</option>
+                <option value="atrasada">Atrasada</option>
               </select>
+            </div>
             <button type="submit">Adicionar Tarefa</button>
           </form>
         </div>

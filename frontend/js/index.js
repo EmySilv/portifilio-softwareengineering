@@ -1,148 +1,161 @@
-const API_URL = "http://localhost:3000/tarefas";
+const apiBaseUrl = 'http://localhost:3000/api/tarefas';
 
-const taskContainer = document.querySelector(".taskToday");
-const searchInput = document.getElementById("searchInput");
-const taskForm = document.getElementById("task-form");
-const taskInput = document.getElementById("task-input");
-const descricaoInput = document.getElementById("descricao-input");
+const taskForm = document.getElementById('task-form');
+const taskInput = document.getElementById('task-input');
+const descricaoInput = document.getElementById('descricao-input');
+const statusInput = document.getElementById('status');
+const searchInput = document.getElementById('searchInput');
 
-let allTasks = []; // cache local para busca
+const taskTodayDiv = document.querySelector('.taskToday');
+const taskCompletedDiv = document.querySelector('.taskCompleted');
+const taskOverdueDiv = document.querySelector('.taskOverdue');
 
-// Carrega todas as tarefas ao iniciar
-async function loadTasks() {
+let tarefas = [];
+let editTaskId = null;
+
+// Carrega todas as tarefas do backend
+async function loadTarefas() {
   try {
-    const res = await fetch(API_URL);
-    const data = await res.json();
-    allTasks = data;
-    renderTasks(data);
-  } catch (err) {
-    console.error("Erro ao carregar tarefas:", err);
+    const res = await fetch(apiBaseUrl);
+    tarefas = await res.json();
+    renderTarefas(tarefas);
+  } catch (error) {
+    alert('Erro ao carregar tarefas: ' + error);
   }
 }
 
-// Renderiza as tarefas no DOM
-function renderTasks(tasks) {
-  // Limpa cards anteriores
-  taskContainer.querySelectorAll(".taskCard").forEach(card => card.remove());
+// Renderiza as tarefas nos respectivos containers
+function renderTarefas(tarefas) {
+  // Limpa os containers (tirar o título p)
+  taskTodayDiv.innerHTML = '<p class="task-title">Tarefas do Dia</p>';
+  taskCompletedDiv.innerHTML = '<p class="task-title">Tarefas Concluídas</p>';
+  taskOverdueDiv.innerHTML = '<p class="task-title">Tarefas Atrasadas</p>';
 
-  tasks.forEach(task => {
-    const card = document.createElement("div");
-    card.classList.add("taskCard");
-
-    card.innerHTML = `
-      <p><strong>Título:</strong> ${task.titulo}</p>
-      <p><strong>Data:</strong> ${new Date(task.data).toLocaleDateString()}</p>
-      <p><strong>Descrição:</strong> ${task.descricao}</p>
-      <p><strong>Status:</strong> ${task.status}</p>
-      <div class="buttonsTask">
-        <button onclick="deleteTask(${task.id})">Excluir</button>
-        <button onclick="editTask(${task.id}, '${escapeString(task.titulo)}', '${escapeString(task.descricao)}', '${task.status}')">Alterar</button>
-      </div>
-    `;
-
-    taskContainer.appendChild(card);
+  tarefas.forEach((tarefa) => {
+    const tarefaEl = criarElementoTarefa(tarefa);
+    
+    // Categoriza e adiciona
+    if (
+      tarefa.status === 'pendente' ||
+      tarefa.status === 'não-iniciado' ||
+      tarefa.status === 'em-andamento'
+    ) {
+      taskTodayDiv.appendChild(tarefaEl);
+    } else if (tarefa.status === 'concluida') {
+      taskCompletedDiv.appendChild(tarefaEl);
+    } else if (tarefa.status === 'atrasada') {
+      taskOverdueDiv.appendChild(tarefaEl);
+    }
   });
 }
 
-// Escapa aspas simples para não quebrar HTML inline
-function escapeString(str) {
-  return str.replace(/'/g, "\\'");
+// Cria o elemento DOM da tarefa com botões de ação
+function criarElementoTarefa(tarefa) {
+  const div = document.createElement('div');
+  div.className = 'task-card';
+  div.style.border = '1px solid #ccc';
+  div.style.margin = '5px';
+  div.style.padding = '10px';
+  div.style.borderRadius = '5px';
+
+  div.innerHTML = `
+    <h4>${tarefa.titulo}</h4>
+    <p>${tarefa.descricao}</p>
+    <p><strong>Status:</strong> ${tarefa.status}</p>
+    <button class="edit-btn" data-id="${tarefa.id}">Editar</button>
+    <button class="delete-btn" data-id="${tarefa.id}">Excluir</button>
+  `;
+
+  // Eventos dos botões
+  div.querySelector('.edit-btn').addEventListener('click', () => abrirEdicao(tarefa));
+  div.querySelector('.delete-btn').addEventListener('click', () => deletarTarefa(tarefa.id));
+
+  return div;
 }
 
-// Criação de nova tarefa
-taskForm.addEventListener("submit", async (e) => {
+// Função para abrir a tarefa no formulário para edição
+function abrirEdicao(tarefa) {
+  taskInput.value = tarefa.titulo;
+  descricaoInput.value = tarefa.descricao;
+  statusInput.value = tarefa.status;
+  editTaskId = tarefa.id;
+  taskForm.querySelector('button[type="submit"]').textContent = 'Atualizar Tarefa';
+}
+
+// Adiciona ou atualiza a tarefa no backend
+taskForm.addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const titulo = taskInput.value.trim();
-  const descricao = descricaoInput.value.trim();
-  if (!titulo || !descricao) return;
-
-  const novaTarefa = {
-    id: Date.now(),
-    titulo,
-    descricao,
-    status: "pendente",
-    criado_por: "u001" // ID fixo, pois sem login
+  const tarefaData = {
+    titulo: taskInput.value.trim(),
+    descricao: descricaoInput.value.trim(),
+    status: statusInput.value,
   };
 
   try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(novaTarefa)
-    });
+    if (editTaskId) {
+      // Atualizar
+      const res = await fetch(`${apiBaseUrl}/${editTaskId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(tarefaData),
+      });
 
-    if (res.ok) {
-      taskInput.value = "";
-      descricaoInput.value = "";
-      await loadTasks();
+      if (!res.ok) throw new Error('Erro ao atualizar tarefa');
+      alert('Tarefa atualizada com sucesso');
+    } else {
+      // Criar
+      const res = await fetch(apiBaseUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(tarefaData),
+      });
+
+      if (!res.ok) throw new Error('Erro ao criar tarefa');
+      alert('Tarefa criada com sucesso');
     }
-  } catch (err) {
-    console.error("Erro ao adicionar tarefa:", err);
+
+    // Resetar formulário e variáveis
+    taskForm.reset();
+    editTaskId = null;
+    taskForm.querySelector('button[type="submit"]').textContent = 'Adicionar Tarefa';
+
+    // Recarregar lista
+    loadTarefas();
+  } catch (error) {
+    alert(error.message);
   }
 });
 
-// Excluir tarefa
-async function deleteTask(id) {
-  if (!confirm("Tem certeza que deseja excluir esta tarefa?")) return;
+// Deleta a tarefa pelo id
+async function deletarTarefa(id) {
+  if (!confirm('Confirma exclusão desta tarefa?')) return;
 
   try {
-    const res = await fetch(`${API_URL}/${id}`, {
-      method: "DELETE"
-    });
-
-    if (res.ok) {
-      await loadTasks();
+    const res = await fetch(`${apiBaseUrl}/${id}`, { method: 'DELETE' });
+    if (res.status === 204) {
+      alert('Tarefa excluída com sucesso');
+      loadTarefas();
+    } else {
+      throw new Error('Erro ao excluir tarefa');
     }
-  } catch (err) {
-    console.error("Erro ao excluir tarefa:", err);
+  } catch (error) {
+    alert(error.message);
   }
 }
 
-// Editar tarefa
-async function editTask(id, titulo, descricao, status) {
-  const novoTitulo = prompt("Novo título:", titulo);
-  const novaDescricao = prompt("Nova descrição:", descricao);
-  const novoStatus = prompt("Novo status:", status);
-
-  if (!novoTitulo || !novaDescricao || !novoStatus) return;
-
-  try {
-    const res = await fetch(`${API_URL}/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        titulo: novoTitulo,
-        descricao: novaDescricao,
-        status: novoStatus
-      })
-    });
-
-    if (res.ok) {
-      await loadTasks();
-    }
-  } catch (err) {
-    console.error("Erro ao editar tarefa:", err);
+// Busca localmente as tarefas pelo título e renderiza
+function searchTarefa() {
+  const termo = searchInput.value.trim().toLowerCase();
+  if (termo === '') {
+    renderTarefas(tarefas);
+  } else {
+    const filtradas = tarefas.filter(t =>
+      t.titulo.toLowerCase().includes(termo)
+    );
+    renderTarefas(filtradas);
   }
 }
 
-// Busca dinâmica
-searchInput.addEventListener("input", async (e) => {
-  const termo = e.target.value.toLowerCase();
-
-  if (!termo) {
-    renderTasks(allTasks); // mostra todas
-    return;
-  }
-
-  try {
-    const res = await fetch(`${API_URL}/search?termo=${encodeURIComponent(termo)}`);
-    const filtradas = await res.json();
-    renderTasks(filtradas);
-  } catch (err) {
-    console.error("Erro ao buscar tarefas:", err);
-  }
-});
-
-// Carregamento inicial
-loadTasks();
+// Inicializa carregando as tarefas
+loadTarefas();

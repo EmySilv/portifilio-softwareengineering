@@ -7,8 +7,7 @@ describe('API de Tarefas', () => {
       id: 101,
       titulo: 'Testar tarefa',
       descricao: 'Teste com Supertest',
-      status: 'pendente',
-      criado_por: 'test001'
+      status: 'pendente'
     });
 
     expect(response.statusCode).toBe(201);
