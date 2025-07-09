@@ -61,13 +61,13 @@ body {
     }
 }
 
-.taskCard{
+.task-card{
     display: flex;
     align-items: flex-start;
     flex-direction: column;
     padding: .5rem;
     gap: 5px;
-    background-color: #eeeeee;
+   
 
     box-shadow: 2px 2px 4px #c5c5c5;
 

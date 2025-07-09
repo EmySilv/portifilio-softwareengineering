@@ -1,38 +1,30 @@
-const { v4: uuidv4 } = require('uuid');
-const Tarefa = require('../models/tarefaModel');
+const db = require('../database/db');
 
-// Simulação de base de dados em memória
-let tarefasDB = [];
-
-const listarTarefas = () => {
-  return tarefasDB;
+const listarTarefas = async () => {
+  const [rows] = await db.query('SELECT * FROM tarefas');
+  return rows;
 };
 
-const buscarPorId = (id) => {
-  return tarefasDB.find(t => t.id === id);
+const buscarPorId = async (id) => {
+  const [rows] = await db.query('SELECT * FROM tarefas WHERE id = ?', [id]);
+  return rows[0];
 };
 
-const salvarTarefa = (tarefa) => {
-  tarefa.id = uuidv4();
-  tarefa.dataCriacao = new Date();
-  tarefasDB.push(tarefa);
-  return tarefa;
+const salvarTarefa = async (tarefa) => {
+  const sql = 'INSERT INTO tarefas (titulo, descricao, status, data) VALUES (?, ?, ?, NOW())';
+  const [result] = await db.query(sql, [tarefa.titulo, tarefa.descricao, tarefa.status]);
+  return { id: result.insertId, ...tarefa, data: new Date() };
 };
 
-const atualizarTarefa = (id, dadosAtualizados) => {
-  const index = tarefasDB.findIndex(t => t.id === id);
-  if (index === -1) return null;
-
-  tarefasDB[index] = { ...tarefasDB[index], ...dadosAtualizados };
-  return tarefasDB[index];
+const atualizarTarefa = async (id, dados) => {
+  const sql = 'UPDATE tarefas SET titulo = ?, descricao = ?, status = ? WHERE id = ?';
+  const [result] = await db.query(sql, [dados.titulo, dados.descricao, dados.status, id]);
+  return result.affectedRows > 0 ? { id, ...dados } : null;
 };
 
-const deletarTarefa = (id) => {
-  const index = tarefasDB.findIndex(t => t.id === id);
-  if (index === -1) return false;
-
-  tarefasDB.splice(index, 1);
-  return true;
+const deletarTarefa = async (id) => {
+  const [result] = await db.query('DELETE FROM tarefas WHERE id = ?', [id]);
+  return result.affectedRows > 0;
 };
 
 module.exports = {

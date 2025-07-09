@@ -1,18 +1,11 @@
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 
-const connection = mysql.createConnection({
+// Cria um pool de conexões com suporte a async/await
+const db = mysql.createPool({
   host: 'localhost',
   user: 'root',
   password: '',
   database: 'db_gestaoecontrole'
 });
 
-connection.connect((err) => {
-  if (err) {
-    console.error('Erro ao conectar ao banco de dados:', err);
-    return;
-  }
-  console.log('Conexão com MySQL estabelecida.');
-});
-
-module.exports = connection;
+module.exports = db;

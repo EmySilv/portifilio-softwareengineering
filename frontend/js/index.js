@@ -17,10 +17,25 @@ let editTaskId = null;
 async function loadTarefas() {
   try {
     const res = await fetch(apiBaseUrl);
-    tarefas = await res.json();
+
+    // Verifica se a resposta foi OK (status 200)
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+
+    const data = await res.json();
+    console.log('Resposta da API:', data, 'Tipo:', typeof data);
+
+    // Verifica se o dado é realmente um array
+    if (!Array.isArray(data)) {
+      throw new Error('Resposta da API não é um array');
+    }
+
+    tarefas = data;
     renderTarefas(tarefas);
   } catch (error) {
-    alert('Erro ao carregar tarefas: ' + error);
+    alert('Erro ao carregar tarefas: ' + error.message);
+    console.error(error);
   }
 }
 
@@ -33,7 +48,7 @@ function renderTarefas(tarefas) {
 
   tarefas.forEach((tarefa) => {
     const tarefaEl = criarElementoTarefa(tarefa);
-    
+
     // Categoriza e adiciona
     if (
       tarefa.status === 'pendente' ||
@@ -58,12 +73,16 @@ function criarElementoTarefa(tarefa) {
   div.style.padding = '10px';
   div.style.borderRadius = '5px';
 
+
   div.innerHTML = `
     <h4>${tarefa.titulo}</h4>
     <p>${tarefa.descricao}</p>
     <p><strong>Status:</strong> ${tarefa.status}</p>
+    <div class="buttons-card">
     <button class="edit-btn" data-id="${tarefa.id}">Editar</button>
     <button class="delete-btn" data-id="${tarefa.id}">Excluir</button>
+    <div>
+    
   `;
 
   // Eventos dos botões
@@ -85,6 +104,8 @@ function abrirEdicao(tarefa) {
 // Adiciona ou atualiza a tarefa no backend
 taskForm.addEventListener('submit', async (e) => {
   e.preventDefault();
+ 
+
 
   const tarefaData = {
     titulo: taskInput.value.trim(),

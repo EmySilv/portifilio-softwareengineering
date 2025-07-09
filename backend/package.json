@@ -1,12 +1,12 @@
 {
   "name": "portifolio-softwareengineering",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "directories": {
     "test": "tests"
   },
   "scripts": {
-    "start": "node index.js",
+    "start": "node server.js",
     "test": "jest"
   },
   "keywords": [],

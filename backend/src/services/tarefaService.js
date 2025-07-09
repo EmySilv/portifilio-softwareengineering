@@ -1,16 +1,16 @@
 const tarefaRepository = require('../repositories/tarefaRepository');
 
-const listarTodas = () => {
-  return tarefaRepository.listarTarefas();
+const listarTodas = async () => {
+  return await tarefaRepository.listarTarefas();
 };
 
-const buscarTarefaPorId = (id) => {
-  return tarefaRepository.buscarPorId(id);
+const buscarTarefaPorId = async (id) => {
+  return await tarefaRepository.buscarPorId(id);
 };
 
-const criarTarefa = (dados) => {
-  // Validações básicas
+const criarTarefa = async (dados) => {
   if (!dados.titulo || dados.titulo.trim() === '') {
+    console.error('Erro: título está vazio ou indefinido');
     throw new Error('Título é obrigatório');
   }
   const novaTarefa = {
@@ -18,15 +18,15 @@ const criarTarefa = (dados) => {
     descricao: dados.descricao || '',
     status: dados.status || 'pendente',
   };
-  return tarefaRepository.salvarTarefa(novaTarefa);
+  return await tarefaRepository.salvarTarefa(novaTarefa);
 };
 
-const atualizarTarefa = (id, dados) => {
-  return tarefaRepository.atualizarTarefa(id, dados);
+const atualizarTarefa = async (id, dados) => {
+  return await tarefaRepository.atualizarTarefa(id, dados);
 };
 
-const deletarTarefa = (id) => {
-  return tarefaRepository.deletarTarefa(id);
+const deletarTarefa = async (id) => {
+  return await tarefaRepository.deletarTarefa(id);
 };
 
 module.exports = {
