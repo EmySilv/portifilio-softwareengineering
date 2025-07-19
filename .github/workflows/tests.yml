@@ -20,7 +20,9 @@ jobs:
           node-version: '18'
 
       - name: Instalar dependências
+        run: cd backend
         run: npm install
 
       - name: Rodar testes com Jest
-        run: npm test
+        run: cd backend
+        run: npm run test
